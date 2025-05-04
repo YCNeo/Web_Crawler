@@ -1,0 +1,23 @@
+{
+  "name": "1132_data_science_final",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "crawl": "npx ts-node src/crawler.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.9.0",
+    "csv-parse": "^5.6.0",
+    "unzipper": "^0.12.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "@types/unzipper": "^0.10.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
