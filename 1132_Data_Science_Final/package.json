@@ -4,7 +4,7 @@
   "description": "房價預測分析",
   "main": "index.js",
   "scripts": {
-    "crawl": "echnpx ts-node src/crawl.ts"
+    "crawl": "npx ts-node src/crawl.ts"
   },
   "keywords": [],
   "author": "",
