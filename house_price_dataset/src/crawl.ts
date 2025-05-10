@@ -39,20 +39,25 @@ function filterRows(csvPath: string, fileName: string): Row[] {
     trim: true,
   });
 
-  if (records.length <= 1) return []; // Chinese + English headers only
+  if (records.length <= 1) return [];
   const dataRows = records.slice(1); // drop English header
 
   return dataRows
     .filter((r) => {
-      /* ① 交易標的: 直接排除土地 / 車位 / 建物 -------------------- */
+      /* ① 交易標的 ----------------------------- */
       const useType = (r["交易標的"] ?? "").trim();
       if (EXCLUDE_SET.has(useType)) return false;
 
-      /* ② 都市 / 非都市土地使用分區: 只要包含「住」才算住宅 -------- */
+      /* ② 土地使用分區  ------------------------ */
       const zoningUrban = r["都市土地使用分區"] ?? "";
       const zoningRural = r["非都市土地使用分區"] ?? "";
       const zoningStr = zoningUrban + zoningRural;
-      if (!ZONING_RESIDENTIAL.test(zoningStr)) return false;
+
+      const keepZoning =
+        ZONING_RESIDENTIAL.test(zoningStr) || // contains「住」
+        (zoningUrban === "" && zoningRural === ""); // or both blank
+
+      if (!keepZoning) return false;
 
       return true;
     })
