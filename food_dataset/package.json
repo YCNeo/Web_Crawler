@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "scrape": "tsx src/index.ts"
+    "scrape": "tsx src/index.ts",
+    "convert": "tsx src/pdf2csv.ts"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +16,7 @@
     "csv-stringify": "^6.5.2",
     "dotenv": "^16.5.0",
     "pdf-parse": "^1.1.1",
+    "pdfjs-dist": "^3.11.174",
     "pinyin-pro": "^3.26.0"
   },
   "devDependencies": {
