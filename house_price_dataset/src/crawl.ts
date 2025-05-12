@@ -10,6 +10,18 @@ const CITY_CODE = "a"; // Taipei City files start with a_
 const EXCLUDE_SET = new Set(["土地", "車位", "建物"]); // 交易標的 to drop
 const ZONING_RESIDENTIAL = /住/; // “住” = human-living zoning
 
+// Build ["101S1","101S2",…,"114S1"] dynamically
+function generateSeasons(): string[] {
+  const seasons: string[] = [];
+  const CURRENT_ROC_YEAR = 114; // ← 2025-05-13 = ROC 114
+  const CURRENT_SEASON = 1; // latest finished quarter
+  for (let y = 101; y <= CURRENT_ROC_YEAR; y++) {
+    const lastQ = y === CURRENT_ROC_YEAR ? CURRENT_SEASON : 4;
+    for (let s = 1; s <= lastQ; s++) seasons.push(`${y}S${s}`);
+  }
+  return seasons;
+}
+
 async function downloadZip(url: string, outfile: string) {
   console.log("⇣ downloading zip …");
   const res = await axios.get(url, {
@@ -37,6 +49,9 @@ function filterRows(csvPath: string, fileName: string): Row[] {
     columns: (hdr) => hdr.map((h: string) => h.replace(/^\uFEFF/, "").trim()),
     skip_empty_lines: true,
     trim: true,
+    relax_quotes: true, // ← tolerate bad quoting
+    relax_column_count: true, // ← tolerate extra commas in those bad rows
+    skip_records_with_error: true, // ← silently drop the malformed line
   });
 
   if (records.length <= 1) return [];
@@ -70,18 +85,45 @@ function filterRows(csvPath: string, fileName: string): Row[] {
   const zipFile = path.join(tmpDir, "lvr.zip");
   fs.mkdirSync(tmpDir, { recursive: true });
   fs.mkdirSync(datasetDir, { recursive: true });
+  const all: Row[] = [];
 
-  // await downloadZip(ZIP_URL, zipFile);
-  // await extractZip(zipFile, tmpDir);
+  /* ---------- fetch ALL seasons into tmp/ ---------- */
+  const seasons = generateSeasons();
+  console.log(`⇣ downloading ${seasons.length} quarterly archives …`);
+
+  for (const season of generateSeasons()) {
+    const url = `https://plvr.land.moi.gov.tw/DownloadSeason?fileName=lvr_landcsv.zip&season=${season}&type=zip`;
+    const zipPath = path.join(tmpDir, `lvr_${season}.zip`);
+    const seasonDir = path.join(tmpDir, season); // ← ① unique folder
+    fs.mkdirSync(seasonDir, { recursive: true });
+
+    await downloadZip(url, zipPath);
+    await extractZip(zipPath, seasonDir); // ← ② extract there
+
+    /* ---- now parse just this season's files & push into `all` ---- */
+    const files = fs
+      .readdirSync(seasonDir)
+      .filter(
+        (f) =>
+          f.toLowerCase().startsWith(`${CITY_CODE}_`) && /_[abc]\.csv$/i.test(f)
+      );
+
+    for (const file of files) {
+      const full = path.join(seasonDir, file);
+      console.log(`⇣ parsing ${file} (${season}) …`);
+      all.push(...filterRows(full, `${season}/${file}`)); // season in source_file
+    }
+  }
 
   // pick every Taipei City file inside the zip
   const taipeiFiles = fs.readdirSync(tmpDir).filter(
     (f) =>
-      f.toLowerCase().startsWith(`${CITY_CODE}_`) && /_[abc]\.csv$/i.test(f) // only _a.csv _b.csv _c.csv
+      f.toLowerCase().startsWith(`${CITY_CODE}_`) && /_[abc]\.csv$/i.test(f) // keep only _a/_b/_c core tables
   );
-  console.log(`Found ${taipeiFiles.length} Taipei-City CSVs`);
+  console.log(
+    `Found ${taipeiFiles.length} Taipei-City CSVs across all seasons`
+  );
 
-  const all: Row[] = [];
   for (const file of taipeiFiles) {
     const fullPath = path.join(tmpDir, file);
     console.log(`⇣ parsing ${file} …`);
