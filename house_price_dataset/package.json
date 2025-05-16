@@ -6,6 +6,7 @@
   "scripts": {
     "crawl": "npx ts-node src/crawl.ts",
     "analyze": "npx ts-node src/analyzation.ts",
+    "analyze_clean": "npx ts-node src/analyzation.ts dataset/taipei_rent_clean.csv analysis/analyze_clean.txt",
     "clean": "npx ts-node src/clean.ts",
     "exec": "npx ts-node src/crawl.ts && npx ts-node src/analyzation.ts && npx ts-node src/clean.ts"
   },
@@ -15,6 +16,7 @@
   "dependencies": {
     "axios": "^1.9.0",
     "csv-parse": "^5.6.0",
+    "dayjs": "^1.11.13",
     "papaparse": "^5.5.2",
     "unzipper": "^0.12.3"
   },
