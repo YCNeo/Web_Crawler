@@ -78,7 +78,7 @@ function main() {
   console.log("🔍  Analyzing data …");
 
   const raw = fs.readFileSync(csvPath, "utf8");
-  const parsed = Papa.parse<Record<string, string>>(raw, {  
+  const parsed = Papa.parse<Record<string, string>>(raw, {
     header: true,
     skipEmptyLines: true,
   });

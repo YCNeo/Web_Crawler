@@ -5,11 +5,11 @@
   "main": "index.js",
   "scripts": {
     "crawl": "npx ts-node src/crawl.ts",
-    "analyze": "npx ts-node src/analyzation.ts",
-    "analyze_clean": "npx ts-node src/analyzation.ts dataset/taipei_rent_clean.csv analysis/analyze_clean.txt",
+    "anal_src": "npx ts-node src/analyze_source.ts",
+    "anal_cln": "npx ts-node src/analyze_clean.ts",
     "clean": "npx ts-node src/clean.ts",
-    "CA": "npx ts-node src/clean.ts && npx ts-node src/analyzation.ts dataset/taipei_rent_clean.csv analysis/analyze_clean.txt",
-    "exec": "npx ts-node src/crawl.ts && npx ts-node src/analyzation.ts && npx ts-node src/clean.ts"
+    "CA": "npx ts-node src/clean.ts && npx ts-node src/analyze_clean.ts",
+    "exec": "npx ts-node src/crawl.ts && npx ts-node src/analyze_source.ts && npx ts-node src/clean.ts && npx ts-node src/analyze_clean.ts"
   },
   "keywords": [],
   "author": "",
