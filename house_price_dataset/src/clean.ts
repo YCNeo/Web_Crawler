@@ -21,7 +21,12 @@ const DEST =
   process.argv[3] || path.join(__dirname, "../dataset/taipei_rent_clean.csv");
 
 /* ---------- Const ---------- */
-const DROP_COLS = new Set(["非都市土地使用分區", "非都市土地使用編定", "備註"]);
+const DROP_COLS = new Set([
+  "都市土地使用分區",
+  "非都市土地使用分區",
+  "非都市土地使用編定",
+  "備註",
+]);
 const PURPOSE_RE =
   /住家用|住宅|集合住宅|多戶住宅|國民住宅|公寓|雙併住宅|農舍|住商用|住工用|宿舍|寄宿|住宿單元/;
 const EQUIP_SEP = /[、,，]/;
@@ -37,7 +42,7 @@ const HEADER_ORDER = [
   "租賃年月日",
   "總額元",
   "出租型態",
-  "租賃期間天數",
+  "租賃天數",
   "主要用途",
   "租賃層次",
   "總樓層數",
@@ -55,7 +60,6 @@ const HEADER_ORDER = [
   "建物現況格局-廳",
   "建物現況格局-衛",
   "建物現況格局-隔間",
-  "都市土地使用分區",
   "土地移轉總面積平方公尺",
   "建物總面積平方公尺",
   "單價元平方公尺",
@@ -74,7 +78,7 @@ const HEADER_ORDER = [
   "source_file",
 ];
 
-/* ---------- 工具 ---------- */
+/* ---------- Helpers ---------- */
 /** 民國日期字串 → dayjs；支援 6/7 位純數字、`.0`、各種分隔符 */
 function parseROC(raw: string): dayjs.Dayjs | null {
   let s = (raw ?? "").toString().trim();
@@ -222,6 +226,7 @@ const EQUIP_COLS = Array.from(equipSet);
 /* ---------- Cleaning ---------- */
 type Reason =
   | "用途不符"
+  | "租賃筆棟數不符"
   | "建築完成年月缺失"
   | "租賃年月日缺失"
   | "租賃層次不明"
@@ -231,6 +236,7 @@ type Reason =
   | "總額缺失";
 const removed: Record<Reason, number> = {
   用途不符: 0,
+  租賃筆棟數不符: 0,
   建築完成年月缺失: 0,
   租賃年月日缺失: 0,
   租賃層次不明: 0,
@@ -246,6 +252,11 @@ data.forEach((row) => {
   /* --- delete rules --- */
   if (!PURPOSE_RE.test(row["主要用途"] ?? "")) {
     removed["用途不符"]++;
+    return;
+  }
+  const { land, building, parking } = parseTransRatio(row["租賃筆棟數"]);
+  if (land === 0 && building === 0) {
+    removed["租賃筆棟數不符"]++;
     return;
   }
   const builtISO = rocToISO(row["建築完成年月"] ?? "");
@@ -295,12 +306,11 @@ data.forEach((row) => {
   out["租賃層次"] =
     row["租賃層次"] === "全" ? "NA" : floorToNumber(row["租賃層次"]);
 
-  const { land, building, parking } = parseTransRatio(row["租賃筆棟數"]);
   out["交易筆棟數-土地"] = land;
   out["交易筆棟數-建物"] = building;
   out["交易筆棟數-車位"] = parking;
 
-  out["租賃期間天數"] = periodToDays(row["租賃期間"] ?? "") ?? "NA";
+  out["租賃天數"] = periodToDays(row["租賃期間"] ?? "") ?? "NA";
 
   out["主要用途"] = row["主要用途"];
   out["主要建材"] = row["主要建材"]?.trim() || "NA";
