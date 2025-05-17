@@ -8,6 +8,7 @@
     "analyze": "npx ts-node src/analyzation.ts",
     "analyze_clean": "npx ts-node src/analyzation.ts dataset/taipei_rent_clean.csv analysis/analyze_clean.txt",
     "clean": "npx ts-node src/clean.ts",
+    "CA": "npx ts-node src/clean.ts && npx ts-node src/analyzation.ts dataset/taipei_rent_clean.csv analysis/analyze_clean.txt",
     "exec": "npx ts-node src/crawl.ts && npx ts-node src/analyzation.ts && npx ts-node src/clean.ts"
   },
   "keywords": [],
