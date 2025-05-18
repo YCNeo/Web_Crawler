@@ -34,7 +34,7 @@ const CSV_PATH =
 
 const OUT_PATH =
   args.find((a) => a.endsWith(".txt")) ||
-  path.join(__dirname, "../analysis/analyze_clean.txt");
+  path.join(__dirname, "../analysis/anal_cln.txt");
 
 const ORDER: "item" | "amount" = args.includes("item") ? "item" : "amount";
 
