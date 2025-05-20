@@ -6,10 +6,13 @@
   "scripts": {
     "crawl": "npx ts-node src/crawl.ts",
     "clean": "npx ts-node src/clean.ts",
+    "merge": "npx ts-node src/merge.ts",
     "anal_src": "npx ts-node src/analyze.ts dataset/taipei_rent.csv analysis/anal_src.txt",
     "anal_cln": "npx ts-node src/analyze.ts",
+    "anal_mrg": "npx ts-node src/analyze.ts dataset/rent.csv analysis/anal_rent.txt",
     "CA": "npx ts-node src/clean.ts && npx ts-node src/analyze.ts",
-    "exec": "npx ts-node src/crawl.ts && npx ts-node src/analyze.ts dataset/taipei_rent.csv analysis/anal_src.txt && npx ts-node src/clean.ts && npx ts-node src/analyze.ts"
+    "MA": "npx ts-node src/merge.ts && npx ts-node src/analyze.ts dataset/rent.csv analysis/anal_rent.txt",
+    "exec": "npx ts-node src/crawl.ts && npx ts-node src/analyze.ts dataset/taipei_rent.csv analysis/anal_src.txt && npx ts-node src/clean.ts && npx ts-node src/analyze.ts && npx ts-node src/merge.ts && npx ts-node src/analyze.ts dataset/rent.csv analysis/anal_rent.txt"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +20,8 @@
   "dependencies": {
     "axios": "^1.9.0",
     "csv-parse": "^5.6.0",
+    "csv-parser": "^3.2.0",
+    "csv-writer": "^1.6.0",
     "dayjs": "^1.11.13",
     "papaparse": "^5.5.2",
     "unzipper": "^0.12.3"
