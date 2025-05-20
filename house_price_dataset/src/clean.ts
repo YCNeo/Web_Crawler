@@ -22,10 +22,21 @@ const DEST =
 
 /* ---------- Const ---------- */
 const DROP_COLS = new Set([
+  "交易標的",
+  "土地面積平方公尺",
   "都市土地使用分區",
   "非都市土地使用分區",
   "非都市土地使用編定",
+  "租賃筆棟數",
+  "租賃期間",
+  "租賃年月日",
+  "建築完成年月",
+  "車位類別",
+  "車位面積平方公尺",
+  "車位總額元",
+  "附屬設備",
   "備註",
+  "source_file",
 ]);
 const PURPOSE_RE =
   /住家用|住宅|集合住宅|多戶住宅|國民住宅|公寓|雙併住宅|農舍|住商用|住工用|宿舍|寄宿|住宿單元/;
@@ -33,10 +44,18 @@ const EQUIP_SEP = /[、,，]/;
 const MAX_LAYOUT = 100;
 const DAY_MS = 86_400_000;
 
+/* -------- interface --------*/
+interface BuildingTypeMap {
+  [type: string]: string[];
+}
+
+interface MainUsageMap {
+  [type: string]: string[];
+}
+
 /* --- Header Fixed Order --- */
 const HEADER_ORDER = [
   "編號",
-  "交易標的",
   "鄉鎮市區",
   "土地位置建物門牌",
   "租賃年月日",
@@ -44,7 +63,9 @@ const HEADER_ORDER = [
   "出租型態",
   "租賃天數",
   "主要用途",
+  "主要用途分類",
   "租賃層次",
+  "租賃層次(四類)",
   "總樓層數",
   "建物型態",
   "交易筆棟數-土地",
@@ -56,17 +77,16 @@ const HEADER_ORDER = [
   "有無附傢俱",
   "有無電梯",
   "主要建材",
+  "建材分類",
   "建物現況格局-房",
   "建物現況格局-廳",
   "建物現況格局-衛",
   "建物現況格局-隔間",
-  "土地面積平方公尺",
   "建物總面積平方公尺",
   "單價元平方公尺",
-  "車位類別",
-  "車位面積平方公尺",
-  "車位總額元",
   "建築完成年月",
+  "屋齡",
+  "屋齡分類",
   "附屬設備-冷氣",
   "附屬設備-熱水器",
   "附屬設備-洗衣機",
@@ -75,7 +95,6 @@ const HEADER_ORDER = [
   "附屬設備-瓦斯或天然氣",
   "附屬設備-有線電視",
   "附屬設備-網路",
-  "source_file",
 ];
 
 /* ---------- Helpers ---------- */
@@ -196,6 +215,81 @@ function floorToNumber(chinese: string): number {
   return isNegative ? -result : result;
 }
 
+const floorChange = (chinese: string): string => {
+  if (chinese === "全" || chinese === "整棟" || chinese === "整層")
+    return "透天厝";
+
+  const floor = floorToNumber(chinese);
+
+  if (floor < 0) return "地下室";
+  if (floor <= 10) return "低樓層";
+  if (floor <= 20) return "中樓層";
+  if (floor > 20) return "高樓層";
+
+  return "NA"; // 其他情況
+};
+
+const purposeClassify = (purpose: string): string => {
+  const mainUsage: MainUsageMap = {
+    住宅類: ["住宅", "住家用", "集合住宅", "多戶住宅", "公寓"],
+    住商混合: ["住商", "住工", "住宅、店舖"],
+    商業用途: ["商業", "辦公", "事務所", "零售業", "店舖"],
+    工業用途: ["工業", "工廠", "廠房", "倉儲"],
+    特殊用途: ["防空", "醫", "學", "福利", "宿舍", "交通"],
+    未知: [""], // 空字串或 NA
+    其他: ["其他"], // 任何未被歸類到以上條件的值
+  };
+
+  for (const [type, usages] of Object.entries(mainUsage)) {
+    if (usages.some((u) => purpose.includes(u))) {
+      return type;
+    }
+  }
+  return "NA";
+};
+
+const buildingMaterialClassify = (material: string): string => {
+  const buildingType: BuildingTypeMap = {
+    鋼筋混凝土造類: [
+      "鋼筋混凝土",
+      "ＲＣ",
+      "鋼骨鋼筋混凝土",
+      "鋼骨混凝土",
+      "鋼骨ＲＣ造",
+    ],
+    加強磚造類: [
+      "加強磚造",
+      "磚造",
+      "磚石造",
+      "加強石造",
+      "石造",
+      "土磚石混合造",
+    ],
+    鋼骨類: ["鋼骨造", "鋼骨", "鋼構造"],
+    木造類: ["木", "竹"],
+  };
+
+  for (const [type, materials] of Object.entries(buildingType)) {
+    if (materials.some((m) => material.includes(m))) {
+      return type;
+    }
+  }
+
+  return "NA";
+};
+
+const houseAgeClassify = (age: number): string => {
+  if (age < 0) return "NA";
+  if (age <= 5) return "新屋";
+  if (age <= 10) return "5-10年";
+  if (age <= 20) return "10-20年";
+  if (age <= 30) return "20-30年";
+  if (age <= 40) return "30-40年";
+  if (age > 40) return "40年以上";
+
+  return "NA"; // 其他情況
+};
+
 /* ---------- Read CSV ---------- */
 if (!fs.existsSync(SRC)) {
   console.error(`❌  File not found: ${SRC}`);
@@ -226,20 +320,28 @@ const EQUIP_COLS = Array.from(equipSet);
 /* ---------- Cleaning ---------- */
 type Reason =
   | "用途不符"
+  | "交易標的不符"
   | "租賃筆棟數不符"
   | "建築完成年月缺失"
   | "租賃年月日缺失"
   | "租賃層次不明"
+  | "主要建材不明"
+  | "單價為零"
+  | "無須車位出租相關資訊"
   | "房過大"
   | "廳過大"
   | "衛過大"
   | "總額缺失";
 const removed: Record<Reason, number> = {
   用途不符: 0,
+  交易標的不符: 0,
   租賃筆棟數不符: 0,
   建築完成年月缺失: 0,
   租賃年月日缺失: 0,
   租賃層次不明: 0,
+  主要建材不明: 0,
+  單價為零: 0,
+  無須車位出租相關資訊: 0,
   房過大: 0,
   廳過大: 0,
   衛過大: 0,
@@ -254,16 +356,24 @@ data.forEach((row) => {
     removed["用途不符"]++;
     return;
   }
+
+  if (row["交易標的"].includes("房地")) {
+    removed["交易標的不符"]++;
+    return;
+  }
+
   const { land, building, parking } = parseTransRatio(row["租賃筆棟數"]);
   if (land === 0 && building === 0) {
     removed["租賃筆棟數不符"]++;
     return;
   }
+
   const builtISO = rocToISO(row["建築完成年月"] ?? "");
   if (builtISO === null) {
     removed["建築完成年月缺失"]++;
     return;
   }
+
   const leaseISO = rocToISO(row["租賃年月日"] ?? "");
   if (!leaseISO) {
     removed["租賃年月日缺失"]++;
@@ -275,11 +385,13 @@ data.forEach((row) => {
     removed["房過大"]++;
     return;
   }
+
   const halls = +row["建物現況格局-廳"]!;
   if (halls > MAX_LAYOUT) {
     removed["廳過大"]++;
     return;
   }
+
   const baths = +row["建物現況格局-衛"]!;
   if (baths > MAX_LAYOUT) {
     removed["衛過大"]++;
@@ -297,14 +409,31 @@ data.forEach((row) => {
     return;
   }
 
+  if (
+    row["主要建材"] === "見其他登記事項" ||
+    row["主要建材"] === "見使用執照"
+  ) {
+    removed["主要建材不明"]++;
+    return;
+  }
+
+  if (row["單價元平方公尺"] === "") {
+    removed["單價為零"]++;
+    return;
+  }
+
+  if (row["車位類別"] !== "") {
+    removed["無須車位出租相關資訊"]++;
+    return;
+  }
+
   /* --- transform --- */
   const out: Record<string, unknown> = {};
-  out["編號"] = row["編號"];
   out["租賃年月日"] = leaseISO;
   out["建築完成年月"] = builtISO;
 
-  out["租賃層次"] =
-    row["租賃層次"] === "全" ? "NA" : floorToNumber(row["租賃層次"]);
+  out["屋齡"] = dayjs(leaseISO).diff(dayjs(builtISO), "year");
+  out["屋齡分類"] = houseAgeClassify(out["屋齡"] as number);
 
   out["交易筆棟數-土地"] = land;
   out["交易筆棟數-建物"] = building;
@@ -313,11 +442,17 @@ data.forEach((row) => {
   out["租賃天數"] = periodToDays(row["租賃期間"] ?? "") ?? "NA";
 
   out["主要用途"] = row["主要用途"];
+  out["主要用途分類"] = purposeClassify(row["主要用途"] ?? "");
+
   out["主要建材"] = row["主要建材"]?.trim() || "NA";
 
   out["建物現況格局-房"] = rooms;
   out["建物現況格局-廳"] = halls;
   out["建物現況格局-衛"] = baths;
+
+  out["租賃層次(四類)"] = floorChange(row["租賃層次"]?.trim() || "NA");
+
+  out["建材分類"] = buildingMaterialClassify(row["主要建材"]?.trim() || "NA");
 
   [
     "建物現況格局-隔間",
@@ -330,23 +465,16 @@ data.forEach((row) => {
     out[k] = v === "有" ? 1 : v === "無" ? 0 : "NA";
   });
 
+  ["出租型態", "租賃住宅服務"].forEach((k) => {
+    const v = row[k]?.trim();
+    out[k] = v === "" ? "NA" : v;
+  });
+
   out["總額元"] = total;
 
   /* --- copy other cols, omit 附屬設備 / 租賃期間 / drop cols --- */
   Object.entries(row).forEach(([col, v]) => {
-    if (
-      [
-        "附屬設備",
-        "租賃期間",
-        "租賃筆棟數",
-        "建築完成年月",
-        "編號",
-        "租賃年月日",
-        "備註",
-      ].includes(col) ||
-      DROP_COLS.has(col)
-    )
-      return;
+    if (DROP_COLS.has(col)) return;
     if (!out.hasOwnProperty(col)) out[col] = v;
   });
 
@@ -361,7 +489,6 @@ data.forEach((row) => {
     out[`附屬設備-${eq}`] = own.has(eq) ? 1 : 0;
   });
 
-  out["source_file"] = row["source_file"] ?? "";
   cleaned.push(out);
 });
 
