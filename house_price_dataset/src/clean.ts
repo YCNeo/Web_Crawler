@@ -21,14 +21,12 @@ import {
   purposeClassify,
   rocToISO,
   toNum,
-} from "./components/clean_helpers";
+} from "./components/helpers";
 dayjs.extend(customParseFormat);
 
 /* ---------- CLI ---------- */
-const SRC =
-  process.argv[2] || path.join(__dirname, "../dataset/rent_ori.csv");
-const DEST =
-  process.argv[3] || path.join(__dirname, "../dataset/rent_cln.csv");
+const SRC = process.argv[2] || path.join(__dirname, "../dataset/rent_ori.csv");
+const DEST = process.argv[3] || path.join(__dirname, "../dataset/rent_cln.csv");
 
 /* ---------- Const ---------- */
 const DROP_COLS = new Set([
@@ -52,53 +50,6 @@ const PURPOSE_RE =
   /住家用|住宅|集合住宅|多戶住宅|國民住宅|公寓|雙併住宅|農舍|住商用|住工用|宿舍|寄宿|住宿單元/;
 const EQUIP_SEP = /[、,，]/;
 const MAX_LAYOUT = 100;
-
-/* --- Header Fixed Order --- */
-const HEADER_ORDER = [
-  "編號",
-  "鄉鎮市區",
-  "土地位置建物門牌",
-  "租賃年月日",
-  "總額元",
-  "出租型態",
-  "租賃天數",
-  "主要用途",
-  "主要用途分類",
-  "租賃層次",
-  "租賃層次(四類)",
-  "總樓層數",
-  "建物型態",
-  "交易筆棟數-土地",
-  "交易筆棟數-建物",
-  "交易筆棟數-車位",
-  "租賃住宅服務",
-  "有無管理組織",
-  "有無管理員",
-  "有無附傢俱",
-  "有無電梯",
-  "主要建材",
-  "建材分類",
-  "建物現況格局-房",
-  "建物現況格局-廳",
-  "建物現況格局-衛",
-  "建物現況格局-隔間",
-  "建物總面積平方公尺",
-  "單價元平方公尺",
-  "建築完成年月",
-  "屋齡",
-  "屋齡分類",
-  "附屬設備-冷氣",
-  "附屬設備-熱水器",
-  "附屬設備-洗衣機",
-  "附屬設備-電視機",
-  "附屬設備-冰箱",
-  "附屬設備-瓦斯或天然氣",
-  "附屬設備-有線電視",
-  "附屬設備-網路",
-];
-
-/* ---------- Helpers ---------- */
-/** 民國日期字串 → dayjs；支援 6/7 位純數字、`.0`、各種分隔符 */
 
 /* ---------- Read CSV ---------- */
 if (!fs.existsSync(SRC)) {
@@ -302,12 +253,8 @@ data.forEach((row) => {
   cleaned.push(out);
 });
 
-/* ---------- header order ---------- */
-const extra = Object.keys(cleaned[0]).filter((k) => !HEADER_ORDER.includes(k));
-const orderedCols = [...HEADER_ORDER, ...extra];
-
 /* ---------- write ---------- */
-fs.writeFileSync(DEST, Papa.unparse(cleaned, { columns: orderedCols }), "utf8");
+fs.writeFileSync(DEST, Papa.unparse(cleaned), "utf8");
 
 /* ---------- stats ---------- */
 const totalRemoved = Object.values(removed).reduce((a, b) => a + b, 0);

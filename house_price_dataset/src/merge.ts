@@ -3,40 +3,44 @@ import path from "node:path";
 import csvParser from "csv-parser";
 import { createObjectCsvWriter } from "csv-writer";
 
-/**
- * Generic record type representing a row in the CSV.
- */
-interface CsvRecord {
-  [column: string]: string | number;
-}
+/** ------------------------------------------------------------------------
+ * merge.ts – Left‑join, clean, and reshape Taipei rent data.
+ * Steps
+ *  1. Left‑join rent_cln.csv (left) with mrt.csv (right) on 「編號」.
+ *  2. Drop any row whose 「附近建物單位成交均價」 is empty.
+ *  3. Remove the column 「編號」.
+ *  4. Rename:
+ *        x  → 座標 x
+ *        y  → 座標 y
+ *        捷運站距離.公尺. → 捷運站距離(公尺)
+ *  5. Combine line‑flag columns into:
+ *        · 「捷運線」 – comma‑separated list of line names whose flag == 1
+ *        · 「轉乘站」 – 1 if **two or more** line flags are 1, else 0
+ *     (Original line‑flag columns are **kept**.)
+ * -------------------------------------------------------------------------
+ * OUTPUT : root/dataset/rent_mrg.csv
+ * -------------------------------------------------------------------------*/
 
-/**
- * Load a CSV file into memory as an array of objects where each key is a column name.
- */
-async function loadCsv(filePath: string): Promise<CsvRecord[]> {
-  return new Promise((resolve, reject) => {
-    const rows: CsvRecord[] = [];
-    fs.createReadStream(filePath)
+type Row = Record<string, string | number>;
+
+function loadCsv(fp: string): Promise<Row[]> {
+  return new Promise((res, rej) => {
+    const rows: Row[] = [];
+    fs.createReadStream(fp)
       .pipe(csvParser())
-      .on("data", (row) => rows.push(row))
-      .on("end", () => resolve(rows))
-      .on("error", reject);
+      .on("data", (r) => rows.push(r))
+      .on("end", () => res(rows))
+      .on("error", rej);
   });
 }
 
 async function main() {
-  // ─── File Paths ────────────────────────────────────────────────────────────
   const datasetDir = path.resolve(__dirname, "../dataset");
   const rentCsvPath = path.join(datasetDir, "rent_cln.csv");
   const mrtCsvPath = path.join(datasetDir, "mrt.csv");
   const outputCsvPath = path.join(datasetDir, "rent_mrg.csv");
 
-  // ─── Columns To Merge From MRT Dataset ─────────────────────────────────────
-  const extraCols = [
-    "x",
-    "y",
-    "最近捷運站",
-    "捷運站距離.公尺.",
+  const lineCols = [
     "文湖線",
     "淡水信義線",
     "新北投支線",
@@ -45,56 +49,85 @@ async function main() {
     "中和新蘆線",
     "板南線",
     "環狀線",
+  ];
+
+  const mrtCols = [
+    "x",
+    "y",
+    "最近捷運站",
+    "捷運站距離.公尺.",
+    ...lineCols,
     "通車日期",
     "附近建物單位成交均價",
   ];
 
-  // ─── Load Both CSV Files ──────────────────────────────────────────────────
+  // Load both CSVs concurrently
   const [rentRows, mrtRows] = await Promise.all([
     loadCsv(rentCsvPath),
     loadCsv(mrtCsvPath),
   ]);
 
-  // Build a lookup Map for MRT rows keyed by "編號"
-  const mrtMap = new Map<string, CsvRecord>();
-  mrtRows.forEach((row) => {
-    const id = String(row["編號"]).trim();
-    mrtMap.set(id, row);
-  });
+  // Build lookup for MRT rows by 編號 (trimmed)
+  const mrtMap = new Map<string, Row>();
+  mrtRows.forEach((r) => mrtMap.set(String(r["編號"]).trim(), r));
 
-  // ─── Left‑Join On "編號"─────────────────────────────────────────────────────
-  const mergedRows: CsvRecord[] = rentRows.map((rentRow) => {
-    const id = String(rentRow["編號"]).trim();
-    const mrtRow = mrtMap.get(id);
-    const merged: CsvRecord = { ...rentRow };
+  const joined: Row[] = rentRows.map((rent) => {
+    const id = String(rent["編號"]).trim();
+    const mrt = mrtMap.get(id);
+    const row: Row = { ...rent };
 
-    extraCols.forEach((col) => {
-      merged[col] = mrtRow?.[col] ?? ""; // keep empty string if MRT value missing
+    // Copy MRT columns
+    mrtCols.forEach((c) => {
+      row[c] = mrt?.[c] ?? "";
     });
 
-    return merged;
+    // Compose 捷運線 and 轉乘站
+    const activeLines = lineCols.filter((c) => {
+      const v = String(row[c] ?? "").trim();
+      return v !== "" && !isNaN(Number(v)) && Number(v) === 1;
+    });
+    row["捷運線"] = activeLines.join(",");
+    row["轉乘站"] = activeLines.length >= 2 ? 1 : 0;
+
+    // Rename coordinate / distance columns
+    if ("x" in row) {
+      row["座標 x"] = row["x"];
+      delete row["x"];
+    }
+    if ("y" in row) {
+      row["座標 y"] = row["y"];
+      delete row["y"];
+    }
+    if ("捷運站距離.公尺." in row) {
+      row["捷運站距離(公尺)"] = row["捷運站距離.公尺."];
+      delete row["捷運站距離.公尺."];
+    }
+
+    return row;
   });
 
-  // ─── Prepare CSV Writer ────────────────────────────────────────────────────
-  const header = [
-    ...Object.keys(rentRows[0]),
-    ...extraCols.filter(
-      (c) => !Object.prototype.hasOwnProperty.call(rentRows[0], c)
-    ),
-  ];
+  // Filter out rows with empty price
+  const filtered = joined.filter(
+    (r) => String(r["附近建物單位成交均價"]).trim() !== ""
+  );
 
-  const csvWriter = createObjectCsvWriter({
+  // Remove 編號 column
+  filtered.forEach((r) => delete r["編號"]);
+
+  // Dynamically derive header order from the first record
+  const headers = Object.keys(filtered[0] || {});
+
+  const writer = createObjectCsvWriter({
     path: outputCsvPath,
-    header: header.map((id) => ({ id, title: id })),
+    header: headers.map((id) => ({ id, title: id })),
     encoding: "utf8",
   });
 
-  await csvWriter.writeRecords(mergedRows);
-  console.log(`✅ Merged dataset saved to ${outputCsvPath}`);
+  await writer.writeRecords(filtered);
+  console.log(`✅ Wrote ${filtered.length} rows → ${outputCsvPath}`);
 }
 
-// Run the script
-main().catch((err) => {
-  console.error("❌ Merge failed:", err);
+main().catch((e) => {
+  console.error("❌ Merge failed:", e);
   process.exit(1);
 });
