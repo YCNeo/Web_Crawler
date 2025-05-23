@@ -30,7 +30,7 @@ const args = process.argv.slice(2).filter(Boolean);
 
 const CSV_PATH =
   args.find((a) => a.endsWith(".csv")) ||
-  path.join(__dirname, "../dataset/taipei_rent_clean.csv");
+  path.join(__dirname, "../dataset/rent_clean.csv");
 
 const OUT_PATH =
   args.find((a) => a.endsWith(".txt")) ||

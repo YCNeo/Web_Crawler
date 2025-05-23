@@ -27,9 +27,9 @@ async function loadCsv(filePath: string): Promise<CsvRecord[]> {
 async function main() {
   // ─── File Paths ────────────────────────────────────────────────────────────
   const datasetDir = path.resolve(__dirname, "../dataset");
-  const rentCsvPath = path.join(datasetDir, "taipei_rent_clean.csv");
-  const mrtCsvPath = path.join(datasetDir, "clean_mrt.csv");
-  const outputCsvPath = path.join(datasetDir, "rent.csv");
+  const rentCsvPath = path.join(datasetDir, "rent_cln.csv");
+  const mrtCsvPath = path.join(datasetDir, "mrt.csv");
+  const outputCsvPath = path.join(datasetDir, "rent_mrg.csv");
 
   // ─── Columns To Merge From MRT Dataset ─────────────────────────────────────
   const extraCols = [

@@ -159,7 +159,7 @@ function filterRows(csvPath: string, source: string): Row[] {
     .join("\n");
 
   fs.writeFileSync(
-    path.join(datasetDir, "taipei_rent.csv"),
+    path.join(datasetDir, "rent_ori.csv"),
     header.join(",") + "\n" + body,
     "utf8"
   );

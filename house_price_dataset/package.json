@@ -7,12 +7,12 @@
     "crawl": "npx ts-node src/crawl.ts",
     "clean": "npx ts-node src/clean.ts",
     "merge": "npx ts-node src/merge.ts",
-    "anal_src": "npx ts-node src/analyze.ts dataset/taipei_rent.csv analysis/anal_src.txt",
-    "anal_cln": "npx ts-node src/analyze.ts",
-    "anal_mrg": "npx ts-node src/analyze.ts dataset/rent.csv analysis/anal_rent.txt",
-    "CA": "npx ts-node src/clean.ts && npx ts-node src/analyze.ts",
-    "MA": "npx ts-node src/merge.ts && npx ts-node src/analyze.ts dataset/rent.csv analysis/anal_rent.txt",
-    "exec": "npx ts-node src/crawl.ts && npx ts-node src/analyze.ts dataset/taipei_rent.csv analysis/anal_src.txt && npx ts-node src/clean.ts && npx ts-node src/analyze.ts && npx ts-node src/merge.ts && npx ts-node src/analyze.ts dataset/rent.csv analysis/anal_rent.txt"
+    "anal_ori": "npx ts-node src/analyze.ts dataset/rent_ori.csv analysis/anal_ori.txt",
+    "anal_cln": "npx ts-node src/analyze.ts dataset/rent_cln.csv analysis/anal_cln.txt",
+    "anal_mrg": "npx ts-node src/analyze.ts dataset/rent_mrg.csv analysis/anal_mrg.txt",
+    "CA": "npm run clean && npm run anal_cln",
+    "MA": "npm run merge && npm run anal_mrg",
+    "exec": "npm run crawl && npm run anal_ori && npm run CA && npm run MA"
   },
   "keywords": [],
   "author": "",

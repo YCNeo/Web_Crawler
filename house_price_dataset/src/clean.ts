@@ -26,9 +26,9 @@ dayjs.extend(customParseFormat);
 
 /* ---------- CLI ---------- */
 const SRC =
-  process.argv[2] || path.join(__dirname, "../dataset/taipei_rent.csv");
+  process.argv[2] || path.join(__dirname, "../dataset/rent_ori.csv");
 const DEST =
-  process.argv[3] || path.join(__dirname, "../dataset/taipei_rent_clean.csv");
+  process.argv[3] || path.join(__dirname, "../dataset/rent_cln.csv");
 
 /* ---------- Const ---------- */
 const DROP_COLS = new Set([
