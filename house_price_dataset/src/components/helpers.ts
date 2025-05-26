@@ -252,7 +252,7 @@ export function transformRow(
     "建物現況格局-廳": +row["建物現況格局-廳"]!,
     "建物現況格局-衛": +row["建物現況格局-衛"]!,
     租賃層次: row["租賃層次"],
-    "租賃層次(四類)": floorChange(row["租賃層次"]?.trim() || "NA"),
+    租賃層次分類: floorChange(row["租賃層次"]?.trim() || "NA"),
     總額元: toNum(row["總額元"]),
   };
 
