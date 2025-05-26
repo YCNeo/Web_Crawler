@@ -18,7 +18,7 @@
     "CA": "npm run clean && npm run anal_cln",
     "MA": "npm run merge && npm run anal_mrg",
     "OA": "npm run order && npm run anal_all",
-    "CMA": "npm run clean && npm run merge && npm run anal_cln && npm run anal_mrg",
+    "CMA": "npm run clean && npm run merge && npm run order && npm run anal_cln && npm run anal_mrg",
     "make_csv": "npm run crawl && npm run clean && npm run merge",
     "from_head": "npm run make_csv && npm run OA"
   },

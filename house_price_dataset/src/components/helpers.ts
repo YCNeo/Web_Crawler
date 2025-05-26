@@ -1,17 +1,22 @@
 import dayjs from "dayjs";
+import {
+  BuildingTypeMap,
+  CleanRow,
+  MainUsageMap,
+  RawRow,
+  Reason,
+} from "../types";
+import {
+  DROP_COLS,
+  EQUIP_COLS,
+  EQUIP_SEP,
+  MAX_LAYOUT,
+  PURPOSE_RE,
+} from "../clean";
 
 const DAY_MS = 86_400_000;
 
-/* -------- interface --------*/
-interface BuildingTypeMap {
-  [type: string]: string[];
-}
-
-interface MainUsageMap {
-  [type: string]: string[];
-}
-
-export function parseROC(raw: string): dayjs.Dayjs | null {
+function parseROC(raw: string): dayjs.Dayjs | null {
   let s = (raw ?? "").toString().trim();
   if (!s || s.toLowerCase() === "nan") return null;
   if (s.endsWith(".0")) s = s.slice(0, -2);
@@ -33,51 +38,38 @@ export function parseROC(raw: string): dayjs.Dayjs | null {
   return d.isValid() ? d : null;
 }
 
-export const rocToISO = (s: string): string | null =>
-  parseROC(s)?.format("YYYY-MM-DD") ?? null;
+function rocToISO(s: string): string | null {
+  return parseROC(s)?.format("YYYY-MM-DD") ?? null;
+}
 
-export const periodToDays = (s: string): number | null => {
+function periodToDays(s: string): number | null {
   const [a, b] = s.split("~").map((x) => parseROC(x)?.valueOf() ?? null);
   return a !== null && b !== null ? Math.round((b - a) / DAY_MS) : null;
-};
+}
 
 /** 接受字串或數字並轉為數字；失敗回 null */
-export const toNum = (v: unknown): number | null => {
+function toNum(v: unknown): number | null {
   if (typeof v === "number") return Number.isFinite(v) ? v : null;
   if (typeof v === "string") {
     const n = parseFloat(v.replace(/,/g, ""));
     return Number.isFinite(n) ? n : null;
   }
   return null;
-};
+}
 
 /** 解析「土地/建物/車位」比棟數字串 */
-export function parseTransRatio(raw: string | undefined) {
-  let land = 0,
-    building = 0,
-    parking = 0;
-  if (!raw) return { land, building, parking };
+export function parseTransRatio(raw: string | undefined): {
+  land: number;
+  building: number;
+} {
+  const m = (raw ?? "").match(
+    /土地\s*([\d.]+)\s*建物\s*([\d.]+)\s*車位\s*([\d.]+)/
+  );
 
-  // 帶詞的情況
-  const pairRE =
-    /土地\s*[:：]?\s*(\d+(?:\.\d+)?)|建物\s*[:：]?\s*(\d+(?:\.\d+)?)|車位\s*[:：]?\s*(\d+(?:\.\d+)?)/g;
-  let m: RegExpExecArray | null;
-  while ((m = pairRE.exec(raw)) !== null) {
-    if (m[1] !== undefined) land = parseFloat(m[1]);
-    if (m[2] !== undefined) building = parseFloat(m[2]);
-    if (m[3] !== undefined) parking = parseFloat(m[3]);
-  }
-
-  // 單純數字備援 (ex. "1 1 0")
-  if (land === 0 && building === 0 && parking === 0) {
-    const nums = raw.match(/\d+(?:\.\d+)?/g);
-    if (nums && nums.length >= 3) {
-      land = parseFloat(nums[0]);
-      building = parseFloat(nums[1]);
-      parking = parseFloat(nums[2]);
-    }
-  }
-  return { land, building, parking };
+  return {
+    land: m ? parseFloat(m[1]) : 0,
+    building: m ? parseFloat(m[2]) : 0,
+  };
 }
 
 function floorToNumber(chinese: string): number {
@@ -127,7 +119,7 @@ function floorToNumber(chinese: string): number {
   return isNegative ? -result : result;
 }
 
-export const floorChange = (chinese: string): string => {
+function floorChange(chinese: string): string {
   if (chinese === "全" || chinese === "整棟" || chinese === "整層")
     return "透天厝";
 
@@ -139,9 +131,9 @@ export const floorChange = (chinese: string): string => {
   if (floor > 20) return "高樓層";
 
   return "NA"; // 其他情況
-};
+}
 
-export const purposeClassify = (purpose: string): string => {
+function purposeClassify(purpose: string): string {
   const mainUsage: MainUsageMap = {
     住宅類: ["住宅", "住家用", "集合住宅", "多戶住宅", "公寓"],
     住商混合: ["住商", "住工", "住宅、店舖"],
@@ -158,9 +150,9 @@ export const purposeClassify = (purpose: string): string => {
     }
   }
   return "NA";
-};
+}
 
-export const buildingMaterialClassify = (material: string): string => {
+function buildingMaterialClassify(material: string): string {
   const buildingType: BuildingTypeMap = {
     鋼筋混凝土造類: [
       "鋼筋混凝土",
@@ -188,9 +180,9 @@ export const buildingMaterialClassify = (material: string): string => {
   }
 
   return "NA";
-};
+}
 
-export const houseAgeClassify = (age: number): string => {
+function houseAgeClassify(age: number): string {
   if (age < 0) return "NA";
   if (age <= 5) return "新屋";
   if (age <= 10) return "5-10年";
@@ -200,4 +192,111 @@ export const houseAgeClassify = (age: number): string => {
   if (age > 40) return "40年以上";
 
   return "NA"; // 其他情況
-};
+}
+
+export function getRemovalReason(
+  row: RawRow,
+  { land, building }: { land: number; building: number }
+): Reason | null {
+  if (!PURPOSE_RE.test(row["主要用途"] ?? "")) return "用途不符";
+  if (row["交易標的"].includes("房地")) return "交易標的不符";
+  if (row["車位類別"] !== "") return "無須車位出租相關資訊";
+  if (land === 0 && building === 0) return "租賃筆棟數不符";
+  if (row["租賃層次"] === "見其他登記事項") return "租賃層次不明";
+  if (row["主要建材"] === "見其他登記事項" || row["主要建材"] === "見使用執照")
+    return "主要建材不明";
+  if (row["單價元平方公尺"] === "") return "單價為零";
+
+  const builtISO = rocToISO(row["建築完成年月"] ?? "");
+  if (builtISO === null) return "建築完成年月缺失";
+
+  const leaseISO = rocToISO(row["租賃年月日"] ?? "");
+  if (!leaseISO) return "租賃年月日缺失";
+
+  const rooms = +row["建物現況格局-房"]!;
+  const halls = +row["建物現況格局-廳"]!;
+  const baths = +row["建物現況格局-衛"]!;
+  if (rooms > MAX_LAYOUT) return "房過大";
+  if (halls > MAX_LAYOUT) return "廳過大";
+  if (baths > MAX_LAYOUT) return "衛過大";
+
+  const total = toNum(row["總額元"]);
+  if (total === null) return "總額缺失";
+
+  return null;
+}
+
+export function transformRow(
+  row: RawRow,
+  { land, building }: { land: number; building: number }
+): CleanRow {
+  /* ---------- derived basics ---------- */
+  const builtISO = rocToISO(row["建築完成年月"] ?? "")!; // guaranteed valid
+  const leaseISO = rocToISO(row["租賃年月日"] ?? "")!;
+  const age = dayjs(leaseISO).diff(dayjs(builtISO), "year");
+
+  /* ---------- core output object ---------- */
+  const out: CleanRow = {
+    租賃年月日: leaseISO,
+    建築完成年月: builtISO,
+    屋齡: age,
+    屋齡分類: houseAgeClassify(age),
+    "交易筆棟數-土地": land,
+    "交易筆棟數-建物": building,
+    租賃天數: periodToDays(row["租賃期間"] ?? "") ?? "NA",
+    主要用途: row["主要用途"],
+    主要用途分類: purposeClassify(row["主要用途"] ?? ""),
+    主要建材: row["主要建材"]?.trim() || "NA",
+    建材分類: buildingMaterialClassify(row["主要建材"]?.trim() || "NA"),
+    "建物現況格局-房": +row["建物現況格局-房"]!,
+    "建物現況格局-廳": +row["建物現況格局-廳"]!,
+    "建物現況格局-衛": +row["建物現況格局-衛"]!,
+    租賃層次: row["租賃層次"],
+    "租賃層次(四類)": floorChange(row["租賃層次"]?.trim() || "NA"),
+    總額元: toNum(row["總額元"]),
+  };
+
+  /* ---------- boolean-like flags ---------- */
+  [
+    "建物現況格局-隔間",
+    "有無管理組織",
+    "有無附傢俱",
+    "有無電梯",
+    "有無管理員",
+  ].forEach((k) => {
+    const v = row[k]?.trim();
+    out[k] = v === "有" ? 1 : v === "無" ? 0 : "NA";
+  });
+
+  /* ---------- simple “NA” fills ---------- */
+  ["出租型態", "租賃住宅服務"].forEach((k) => {
+    const v = row[k]?.trim();
+    out[k] = v === "" ? "NA" : v;
+  });
+
+  /* ---------- copy untouched columns ---------- */
+  for (const [col, v] of Object.entries(row)) {
+    if (
+      DROP_COLS.has(col) ||
+      col === "附屬設備" ||
+      col === "租賃期間" ||
+      out.hasOwnProperty(col)
+    )
+      continue;
+    out[col] = v;
+  }
+
+  /* ---------- expand equipment flags ---------- */
+  const ownEquip = new Set(
+    (row["附屬設備"] ?? "")
+      .split(EQUIP_SEP)
+      .map((x) => x.trim())
+      .filter(Boolean)
+  );
+
+  for (const eq of EQUIP_COLS) {
+    out[`附屬設備-${eq}`] = ownEquip.has(eq) ? 1 : 0;
+  }
+
+  return out;
+}
