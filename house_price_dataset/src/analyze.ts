@@ -4,9 +4,7 @@
  *  Purpose     : Quick descriptive stats & frequency reports for any stage   *
  *                of the rent dataset to support exploratory analysis.        *
  *                                                                            *
- *  Usage       : ts-node analyze.ts  [/root/dataset/rent_cln.csv]            *
- *                                    [/root/analysis/report.txt]             *
- *                                    [amount|item]                           *
+ *  Usage       : ts-node analyze.ts [source_file] [export_file] [amount|item]*
  *                                                                            *
  *  Workflow    : 1) Load CSV; cast dates to YYYY-MM                          *
  *                2) Skip high-cardinality IDs                                *

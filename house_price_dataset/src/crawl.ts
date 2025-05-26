@@ -4,12 +4,12 @@
  *  Purpose     : Crawl quarterly MOI ZIP archives, keep Taipei rent tables,  *
  *                and assemble the first raw dataset.                         *
  *                                                                            *
- *  Usage       : ts-node crawl.ts  [/root/dataset/rent_ori.csv]              *
+ *  Usage       : ts-node crawl.ts                                            *
  *                                                                            *
  *  Workflow    : 1) Build season list 101S1-current                          *
  *                2) Download & unzip → a_*_c.csv files                       *
  *                3) Apply Stage-1 row filters (住宅用途, valid dates, …)      *
- *                4) Deduplicate on 編號+租賃日+門牌                             *
+ *                4) Deduplicate on 編號+租賃日+門牌                           *
  *                5) Write rent_ori.csv                                       *
  *                                                                            *
  *  Source file : MOI open-data ZIPs (remote)                                 *

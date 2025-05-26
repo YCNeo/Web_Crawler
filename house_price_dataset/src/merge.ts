@@ -3,14 +3,12 @@
  *  File        : merge.ts                                                    *
  *  Purpose     : Enrich cleaned rent data with MRT proximity information.    *
  *                                                                            *
- *  Usage       : ts-node merge.ts  [/root/dataset/rent_cln.csv]              *
- *                                   [/root/dataset/mrt.csv]                  *
- *                                   [/root/dataset/rent_mrg.csv]             *
+ *  Usage       : ts-node merge.ts                                            *
  *                                                                            *
- *  Workflow    : 1) Left-join rent_cln ← mrt on 編號                          *
- *                2) Copy + rename MRT cols; derive 捷運線, 轉乘站 flag         *
+ *  Workflow    : 1) Left-join rent_cln ← mrt on 編號                         *
+ *                2) Copy + rename MRT cols; derive 捷運線, 轉乘站 flag        *
  *                3) Drop rows without 附近建物單位成交均價                     *
- *                4) Remove 編號 and save rent_mrg.csv                         *
+ *                4) Remove 編號 and save rent_mrg.csv                        *
  *                                                                            *
  *  Source files: /root/dataset/rent_cln.csv, /root/dataset/mrt.csv           *
  *  Export file : /root/dataset/rent_mrg.csv                                  *

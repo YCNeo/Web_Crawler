@@ -3,7 +3,7 @@
  *  File        : order.ts                                                    *
  *  Purpose     : Apply a canonical column order to every CSV in /dataset.    *
  *                                                                            *
- *  Usage       : ts-node order.ts  [/root/dataset/*.csv]                     *
+ *  Usage       : ts-node order.ts                                            *
  *                                                                            *
  *  Workflow    : 1) For each CSV                                             *
  *                   – Parse header                                           *

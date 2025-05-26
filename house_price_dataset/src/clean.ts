@@ -3,8 +3,7 @@
  *  File        : clean.ts                                                    *
  *  Purpose     : Deep-clean raw rent data and engineer core features.        *
  *                                                                            *
- *  Usage       : ts-node clean.ts  [/root/dataset/rent_ori.csv]              *
- *                                    [/root/dataset/rent_cln.csv]            *
+ *  Usage       : ts-node clean.ts [source_file] [export_file]                *
  *                                                                            *
  *  Workflow    : 1) Load rent_ori.csv                                        *
  *                2) Drop rows via getRemovalReason()                         *
