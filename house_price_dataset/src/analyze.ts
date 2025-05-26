@@ -1,24 +1,23 @@
-#!/usr/bin/env ts-node
 /**
- * analyze.ts – profile of taipei_rent_clean.csv  (v2025-05-17 R2)
- *
- * • Skip   : 編號、土地位置建物門牌、備註
- * • `租賃年月日`、`建築完成年月` → 只統計到「YYYY-MM」
- *
- * 前置摘要：來源檔路徑、筆數、欄位數、分析日期、排序依據
- *
- * Usage
- * ------
- *   ts-node analyze.ts [csvPath] [outputPath] [order]
- *
- *   • csvPath   (opt)  default = ./dataset/taipei_rent_clean.csv
- *   • outputPath(opt)  default = ./analysis/analyze_clean.txt
- *   • order     (opt)  "item" | "amount"   default = "amount"
- *
- * Example
- *   ts-node analyze.ts                        # 按數量排序 (預設)
- *   ts-node analyze.ts item                   # 按值字典序
- *   ts-node analyze.ts ./my.csv ./out.txt item
+ * ========================================================================== *
+ *  File        : analyze.ts                                                  *
+ *  Purpose     : Quick descriptive stats & frequency reports for any stage   *
+ *                of the rent dataset to support exploratory analysis.        *
+ *                                                                            *
+ *  Usage       : ts-node analyze.ts  [/root/dataset/rent_cln.csv]            *
+ *                                    [/root/analysis/report.txt]             *
+ *                                    [amount|item]                           *
+ *                                                                            *
+ *  Workflow    : 1) Load CSV; cast dates to YYYY-MM                          *
+ *                2) Skip high-cardinality IDs                                *
+ *                3) Compute frequencies / min-max / histograms               *
+ *                4) Write plain-text report                                  *
+ *                                                                            *
+ *  Source file : Any ordered CSV in /root/dataset                            *
+ *  Export file : /root/analysis/*.txt                                        *
+ *  Simple rules: Safe numeric casts; month-level date bins                   *
+ *  Updated     : 2025-05-26                                                  *
+ * ========================================================================== *
  */
 
 import fs from "fs";

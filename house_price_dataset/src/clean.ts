@@ -1,10 +1,22 @@
-#!/usr/bin/env ts-node
 /**
- * clean.ts – Taipei rent dataset cleaner (2025-05-26)
- *
- * • Input : ./dataset/taipei_rent.csv   (或 CLI argv[2])
- * • Output: ./dataset/taipei_rent_clean.csv (或 CLI argv[3])
- * • Terminal 只列刪除統計與剩餘筆數
+ * ========================================================================== *
+ *  File        : clean.ts                                                    *
+ *  Purpose     : Deep-clean raw rent data and engineer core features.        *
+ *                                                                            *
+ *  Usage       : ts-node clean.ts  [/root/dataset/rent_ori.csv]              *
+ *                                    [/root/dataset/rent_cln.csv]            *
+ *                                                                            *
+ *  Workflow    : 1) Load rent_ori.csv                                        *
+ *                2) Drop rows via getRemovalReason()                         *
+ *                3) transformRow(): dates → ISO, 屋齡, flags, enums …        *
+ *                4) Drop DROP_COLS columns                                   *
+ *                5) Save rent_cln.csv & log summary                          *
+ *                                                                            *
+ *  Source file : /root/dataset/rent_ori.csv                                  *
+ *  Export file : /root/dataset/rent_cln.csv                                  *
+ *  Simple rules: 住宅用途, 單價>0, 建材/層次≠「見其他」, layout≤100 …           *
+ *  Updated     : 2025-05-26                                                  *
+ * ========================================================================== *
  */
 
 import fs from "node:fs";

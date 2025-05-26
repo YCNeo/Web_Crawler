@@ -1,13 +1,23 @@
-/* ------------------------------------------------------------------
-   Taipei historical “rent” crawler
-   – downloads every quarterly ZIP (101S1 → 114S1)
-   – keeps only Taipei files  a_*_c.csv   (land-rent detail table)
-   – filters rows: 交易標的 ∉ {土地, 車位, 建物}  AND
-                   土地使用分區含「住」或兩欄皆空 AND
-                   有租賃年月日 or 租賃期間
-   – dedupes on  (編號-交易年月日-門牌)
-   – exports ONE aligned CSV:  dataset/taipei_rent.csv
-   ------------------------------------------------------------------ */
+/**
+ * ========================================================================== *
+ *  File        : crawl.ts                                                    *
+ *  Purpose     : Crawl quarterly MOI ZIP archives, keep Taipei rent tables,  *
+ *                and assemble the first raw dataset.                         *
+ *                                                                            *
+ *  Usage       : ts-node crawl.ts  [/root/dataset/rent_ori.csv]              *
+ *                                                                            *
+ *  Workflow    : 1) Build season list 101S1-current                          *
+ *                2) Download & unzip → a_*_c.csv files                       *
+ *                3) Apply Stage-1 row filters (住宅用途, valid dates, …)      *
+ *                4) Deduplicate on 編號+租賃日+門牌                             *
+ *                5) Write rent_ori.csv                                       *
+ *                                                                            *
+ *  Source file : MOI open-data ZIPs (remote)                                 *
+ *  Export file : /root/dataset/rent_ori.csv                                  *
+ *  Simple rules: see rule.md §Stage 1                                        *
+ *  Updated     : 2025-05-26                                                  *
+ * ========================================================================== *
+ */
 
 import fs from "node:fs";
 import path from "node:path";

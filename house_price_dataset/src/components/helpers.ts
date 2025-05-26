@@ -247,7 +247,7 @@ export function transformRow(
     主要用途: row["主要用途"],
     主要用途分類: purposeClassify(row["主要用途"] ?? ""),
     主要建材: row["主要建材"]?.trim() || "NA",
-    建材分類: buildingMaterialClassify(row["主要建材"]?.trim() || "NA"),
+    主要建材分類: buildingMaterialClassify(row["主要建材"]?.trim() || "NA"),
     "建物現況格局-房": +row["建物現況格局-房"]!,
     "建物現況格局-廳": +row["建物現況格局-廳"]!,
     "建物現況格局-衛": +row["建物現況格局-衛"]!,

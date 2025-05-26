@@ -1,25 +1,28 @@
+/**
+ * ========================================================================== *
+ *  File        : merge.ts                                                    *
+ *  Purpose     : Enrich cleaned rent data with MRT proximity information.    *
+ *                                                                            *
+ *  Usage       : ts-node merge.ts  [/root/dataset/rent_cln.csv]              *
+ *                                   [/root/dataset/mrt.csv]                  *
+ *                                   [/root/dataset/rent_mrg.csv]             *
+ *                                                                            *
+ *  Workflow    : 1) Left-join rent_cln ← mrt on 編號                          *
+ *                2) Copy + rename MRT cols; derive 捷運線, 轉乘站 flag         *
+ *                3) Drop rows without 附近建物單位成交均價                     *
+ *                4) Remove 編號 and save rent_mrg.csv                         *
+ *                                                                            *
+ *  Source files: /root/dataset/rent_cln.csv, /root/dataset/mrt.csv           *
+ *  Export file : /root/dataset/rent_mrg.csv                                  *
+ *  Simple rules: keep rows with MRT price index; rename 距離欄位              *
+ *  Updated     : 2025-05-26                                                  *
+ * ========================================================================== *
+ */
+
 import fs from "node:fs";
 import path from "node:path";
 import csvParser from "csv-parser";
 import { createObjectCsvWriter } from "csv-writer";
-
-/** ------------------------------------------------------------------------
- * merge.ts – Left‑join, clean, and reshape Taipei rent data.
- * Steps
- *  1. Left‑join rent_cln.csv (left) with mrt.csv (right) on 「編號」.
- *  2. Drop any row whose 「附近建物單位成交均價」 is empty.
- *  3. Remove the column 「編號」.
- *  4. Rename:
- *        x  → 座標 x
- *        y  → 座標 y
- *        捷運站距離.公尺. → 捷運站距離(公尺)
- *  5. Combine line‑flag columns into:
- *        · 「捷運線」 – comma‑separated list of line names whose flag == 1
- *        · 「轉乘站」 – 1 if **two or more** line flags are 1, else 0
- *     (Original line‑flag columns are **kept**.)
- * -------------------------------------------------------------------------
- * OUTPUT : root/dataset/rent_mrg.csv
- * -------------------------------------------------------------------------*/
 
 type Row = Record<string, string | number>;
 
