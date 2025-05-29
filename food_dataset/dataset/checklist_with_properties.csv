@@ -1,0 +1,184 @@
+﻿ID,中文,英文,食材屬性
+3,包心芥菜,Heading mustard,熱性
+5,韭菜,Chinese chives,熱性
+6,韭菜花,Chinese chive flowers,熱性
+7,紫蘇,Perilla,熱性
+8,雪裡紅,Salted potherb mustard,熱性
+10,甘藍,Kale,溫性
+11,芥藍,Chinese kale,溫性
+12,高麗菜,Cabbage,溫性
+13,青江菜,Bok choy,溫性
+14,青椒,Green bell pepper,溫性
+16,萵苣,Lettuce,溫性
+17,蘿蔔嬰,Radish sprouts,溫性
+18,A菜,A-choy,平性
+19,小麥草,Wheatgrass,平性
+21,大頭菜,Kohlrabi,平性
+22,白鳳菜,Gynura divaricata,平性
+23,枸杞葉,Goji leaves,平性
+25,芹菜,Celery,平性
+26,油菜,Yau choy,平性
+27,秋葵,Okra,平性
+28,紅鳳菜,Okinawa spinach,平性
+29,紅莧菜,Red amaranth,平性
+31,菠菜,Spinach,平性
+32,酸菜,Pickled mustard greens,平性
+33,番薯葉,Sweet potato leaves,平性
+34,大白菜,Napa cabbage,涼性
+37,空心菜,Water spinach,涼性
+38,西洋芹,Celery,涼性
+41,袖珍菇,Oyster mushroom,平性
+42,鮑魚菇,Abalone mushroom,平性
+43,木耳,Wood ear mushroom,平性
+44,白木耳,Snow fungus,平性
+46,杏鮑菇,King oyster mushroom,平性
+47,香菇,Shiitake mushroom,平性
+48,雞腿菇,Shaggy mane mushroom,平性
+49,舞茸,Maitake mushroom,平性
+51,金針菇,Enoki mushroom,涼性
+52,草菇,Straw mushroom,涼性
+54,黃豆芽,Soybean sprouts,平性
+55,苜蓿芽,Alfalfa sprouts,平性
+56,南瓜,Pumpkin,溫性
+57,玉米筍,Baby corn,溫性
+60,黃瓜,Cucumber,涼性
+61,冬瓜,Winter melon,涼性
+62,胡瓜,Cucumber,涼性
+63,絲瓜,Luffa,涼性
+64,茄子,Eggplant,涼性
+65,小黃瓜,Cucumber,涼性
+67,海帶,Kelp,涼性
+68,髮菜,Black moss,涼性
+69,苦瓜,Bitter melon,寒性
+71,紫菜,Nori,寒性
+74,棗子,Jujube,熱性
+75,桃子,Peach,熱性
+76,楊梅,Chinese bayberry,熱性
+77,木瓜,Papaya,溫性
+78,梅子,Plum,溫性
+79,芭樂,Guava,溫性
+80,番茄,Tomato,涼性
+81,草莓,Strawberry,涼性
+84,榴槤,Durian,熱性
+85,水蜜桃,Peach,溫性
+86,紅棗,Red date,溫性
+87,荔枝,Lychee,溫性
+88,龍眼,Longan,溫性
+89,櫻桃,Cherry,溫性
+90,李子,Plum,平性
+91,鳳梨,Pineapple,平性
+92,葡萄,Grape,熱性
+93,藍莓,Blueberry,平性
+94,芒果,Mango,平性
+96,酪梨,Avocado,平性
+97,梨子,Pear,寒性
+98,山竹,Mangosteen,寒性
+100,西瓜,Watermelon,寒性
+103,美濃瓜,Minong melon,寒性
+104,百香果,Passion fruit,寒性
+105,香蕉,Banana,寒性
+106,椰子,Coconut,寒性
+107,石榴,Pomegranate,溫性
+108,紅毛丹,Rambutan,溫性
+109,鴨梨,Ya pear,溫性
+110,火龍果,Dragon fruit,涼性
+111,無花果,Fig,涼性
+112,覆盆子,Raspberry,涼性
+113,柿餅,Dried persimmon,涼性
+114,楊桃,Star fruit,平性
+115,橄欖,Olive,平性
+116,釋迦,Sugar apple,平性
+117,柳丁,Orange,寒性
+118,橘子,Mandarin,寒性
+120,文旦,Pomelo,寒性
+121,柚子,Pomelo,寒性
+122,柿子,Persimmon,寒性
+123,金桔,Kumquat,溫性
+124,金棗,Kumquat,溫性
+126,萊姆,Lime,涼性
+127,蘋果,Apple,涼性
+128,蓮霧,Wax apple,涼性
+130,奇異果,Kiwifruit,寒性
+131,西洋梨,Pear,寒性
+133,葡萄柚,Grapefruit,寒性
+136,松子,Pine nut,溫性
+137,栗子,Chestnut,溫性
+141,燕麥,Oat,溫性
+143,糯米,Glutinous rice,溫性
+144,米豆,Cowpea,平性
+146,菜豆,Green bean,平性
+147,花生,Peanut,平性
+148,花豆,Kidney bean,平性
+149,豌豆,Pea,平性
+150,紅豆,Adzuki bean,平性
+151,黑豆,Black soybean,平性
+152,黃豆,Soybean,平性
+153,納豆,Natto,平性
+156,豆薯,Jicama,平性
+157,杏仁,Almond,平性
+158,玉米,Corn,溫性
+161,南瓜子,Pumpkin seed,溫性
+162,葵瓜子,Sunflower seed,平性
+163,四季豆,Green bean,平性
+164,皇帝豆,Lima bean,平性
+166,蓮子,Lotus seed,溫性
+167,腰果,Cashew nut,平性
+168,芝麻,Sesame seed,平性
+169,豆腐,Tofu,平性
+174,菱角,Water caltrop,平性
+175,蕎麥,Buckwheat,平性
+176,麵粉,Wheat flour,平性
+177,綠豆,Mung bean,寒性
+178,小米,Millet,寒性
+179,紅蘿蔔,Carrot,溫性
+180,馬鈴薯,Potato,平性
+181,番薯,Sweet potato,平性
+183,芋頭,Taro,平性
+185,白蘿蔔,Daikon,涼性
+188,蓮藕,Lotus root,涼性
+190,竹筍,Bamboo shoot,寒性
+191,筊白筍,Water bamboo,寒性
+193,蘆筍,Asparagus,寒性
+208,豬肚,Pork tripe,熱性
+212,牛肚,Beef tripe,平性
+216,鴨血,Duck blood,寒性
+219,牛奶,Milk,平性
+221,鵪鶉蛋,Quail egg,平性
+223,皮蛋,Century egg,涼性
+231,海參,Sea cucumber,熱性
+232,蝦子,Shrimp,熱性
+233,蝦米,Dried shrimp,熱性
+234,龍蝦,Lobster,熱性
+253,干貝,Dried scallop,平性
+254,海膽,Sea urchin,平性
+257,鮑魚,Abalone,平性
+262,章魚,Octopus,寒性
+267,螃蟹,Crab,寒性
+268,蜆,Freshwater clam,寒性
+270,辣椒,Chili pepper,熱性
+271,山葵,Wasabi,熱性
+272,白胡椒,White pepper,熱性
+273,黑胡椒,Black pepper,熱性
+274,洋蔥,Onion,熱性
+275,肉桂,Cinnamon,熱性
+276,八角,Star anise,熱性
+278,紅砂糖,Brown sugar,溫性
+282,薑,Ginger,溫性
+283,蔥,Green onion,溫性
+285,蒜,Garlic,溫性
+286,紅花,Safflower,溫性
+287,小荳蔻,Cardamom,溫性
+288,荳蔻,Nutmeg,溫性
+291,芫荽,Cilantro,溫性
+296,蜂蜜,Honey,平性
+297,奶油,Cream,平性
+298,乳酪,Cheese,平性
+303,醬油,Soy sauce,平性
+306,丁香,Clove,熱性
+307,百里香,Thyme,未分類
+308,茴香菜,Fennel,未分類
+311,巴西利,Parsley,未分類
+312,迷迭香,Rosemary,未分類
+318,魚腥草,Fish mint,涼性
+319,薄荷,Mint,涼性
+325,可可,Cocoa,平性
